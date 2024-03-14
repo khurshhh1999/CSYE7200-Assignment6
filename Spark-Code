@@ -53,6 +53,38 @@ scala> trainData.stat.corr("Survived", "Pclass")
      | trainData.stat.corr("Survived", "Age")
 val res3: Double = 0.010539215871285682
 
+scala> import org.apache.spark.sql.functions._
+     | 
+     | trainData.groupBy("Pclass")
+     |   .agg(
+     |     avg("Fare").alias("Average Fare"),
+     |     stddev("Fare").alias("Fare StdDev"),
+     |     min("Fare").alias("Minimum Fare"),
+     |     max("Fare").alias("Maximum Fare")
+     |   ).show()
++------+------------------+------------------+------------+------------+
+|Pclass|      Average Fare|       Fare StdDev|Minimum Fare|Maximum Fare|
++------+------------------+------------------+------------+------------+
+|     1| 84.15468749999992| 78.38037264672882|         0.0|    512.3292|
+|     3|13.675550101832997|11.778141704387311|         0.0|       69.55|
+|     2| 20.66218315217391|13.417398756149339|         0.0|        73.5|
++------+------------------+------------------+------------+------------+
+
+import org.apache.spark.sql.functions._
+
+scala> trainData.groupBy("Pclass", "Sex") .agg( avg("Survived").alias("Survival Rate") ).orderBy("Pclass", "Survival Rate").show()
++------+------+-------------------+
+|Pclass|   Sex|      Survival Rate|
++------+------+-------------------+
+|     1|  male|0.36885245901639346|
+|     1|female| 0.9680851063829787|
+|     2|  male| 0.1574074074074074|
+|     2|female| 0.9210526315789473|
+|     3|  male|0.13544668587896252|
+|     3|female|                0.5|
++------+------+-------------------+
+
+
 scala> val trainDataWithFeatures = trainData
      |   .withColumn("FamilySize", col("SibSp") + col("Parch") + 1)
      |   .drop("SibSp", "Parch", "Ticket", "Cabin")
